@@ -153,7 +153,7 @@ impl<S: MidiStatusCodec> MidiCodec<S> {
 
         let channel = Channel::from_index(status & 0x0F)?;
         let mut get_byte = || {
-            let byte = raw[cursor];
+            let byte = *raw.get(cursor).ok_or(FromBytesError::NotEnoughBytes)?;
             cursor += 1;
             U7::new(byte)
         };
@@ -225,7 +225,7 @@ fn status_byte(message: &MidiMessage) -> u8 {
 }
 
 fn combine_u14(lower: U7, higher: U7) -> U14 {
-    let raw = u16::from(u8::from(lower)) + u16::from(u8::from(higher)) << 7;
+    let raw = u16::from(u8::from(lower)) | u16::from(u8::from(higher)) << 7;
     U14::try_from(raw).unwrap()
 }
 
