@@ -1,0 +1,16 @@
+[package]
+name = "midi-stream"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+std = ["wmidi/std"]
+tokio = ["std", "dep:thiserror", "dep:tokio-util"]
+
+[dependencies]
+thiserror = { version = "2.0.18", optional = true }
+tokio-util = { version = "0.7.18", features = ["codec"], optional = true }
+wmidi = { version = "4.0.10", default-features = false }
+
+[dev-dependencies]
+hex = "0.4.3"
