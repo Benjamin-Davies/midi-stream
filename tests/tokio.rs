@@ -2,7 +2,7 @@
 
 use midi_stream::MidiCodec;
 use tokio_util::{
-    bytes::BytesMut,
+    bytes::{BufMut, BytesMut},
     codec::{Decoder, Encoder},
 };
 use wmidi::{Channel, MidiMessage, Note, U7};
@@ -90,6 +90,38 @@ fn test_decode_running_status() {
 
     while let Some(msg) = codec.decode(&mut buf).unwrap() {
         messages.push(msg);
+    }
+
+    assert_eq!(messages, make_messages());
+}
+
+#[test]
+fn test_decode_repeated_trickle() {
+    let mut codec = MidiCodec::new();
+    let mut buf = BytesMut::new();
+    let mut messages = Vec::new();
+
+    for b in hex::decode(RAW_BYTES_REPEATED).unwrap() {
+        buf.put_u8(b);
+        while let Some(msg) = codec.decode(&mut buf).unwrap() {
+            messages.push(msg);
+        }
+    }
+
+    assert_eq!(messages, make_messages());
+}
+
+#[test]
+fn test_decode_running_status_trickle() {
+    let mut codec = MidiCodec::with_running_status();
+    let mut buf = BytesMut::new();
+    let mut messages = Vec::new();
+
+    for b in hex::decode(RAW_BYTES_RUNNING_STATUS).unwrap() {
+        buf.put_u8(b);
+        while let Some(msg) = codec.decode(&mut buf).unwrap() {
+            messages.push(msg);
+        }
     }
 
     assert_eq!(messages, make_messages());
